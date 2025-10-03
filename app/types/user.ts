@@ -1,4 +1,5 @@
 import { Role } from '@prisma/client'
+import { Vendedor } from './vendedor'
 
 export interface User {
   id: string
@@ -14,6 +15,8 @@ export interface User {
   createdAt: Date
   businessId: string | null
   avatar: string;
+  vendedor?: Vendedor | null 
+  vendedorId?: string | null
 }
 
 export type BusinessUserType = Pick<User, 'id' | 'email' | 'name' | 'role' | 'password'>;

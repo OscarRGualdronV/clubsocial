@@ -11,7 +11,7 @@ export async function GET(req: Request) {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string }
-    const user = await prisma.user.findUnique({ where: { id: decoded.id } })
+    const user = await prisma.user.findUnique({ where: { id: decoded.id }, include: { vendedor: true },})
 
     if (!user) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 })
@@ -30,6 +30,7 @@ export async function GET(req: Request) {
     destino: user.destino,
     createdAt: user.createdAt,
     avatar: user.avatar,
+    vendedor: user.vendedor
   }
     })
   } catch (error) {

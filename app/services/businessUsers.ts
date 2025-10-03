@@ -14,6 +14,7 @@ class BusinessUser {
           password,
         },
       });
+
     } catch (error) {
       console.error('Error al crear el usuario', error);
       throw error;

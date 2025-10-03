@@ -1,6 +1,7 @@
 "use client"
 
 import DestinosList from "./DestinosList"
+import VendedorCard from "./VendedorCard"
 import { useState } from "react"
 import { User } from "@/app/types/user"
 
@@ -95,7 +96,11 @@ export default function UserProfile({ user }: Props) {
       {/* Secciones futuras */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl shadow-md p-6 text-center text-gray-500">
-          Aquí irán los agentes del viaje ✈️
+          {user.vendedor ? (
+          <VendedorCard vendedor={user.vendedor} />
+        ) : (
+          <p className="text-gray-500">No tienes un vendedor asignado</p>
+        )}
         </div>
         <div className="bg-white rounded-2xl shadow-md p-6 text-center text-gray-500">
           <DestinosList userDestino={user.destino ?? ""} />

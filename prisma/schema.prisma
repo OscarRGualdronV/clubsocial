@@ -28,6 +28,18 @@ model User {
   business    Business? @relation(fields: [businessId], references: [id])
   businessId  String?
   avatar    String   @default("/images/default-avatar.png")
+
+  vendedor   Vendedor? @relation(fields: [vendedorId], references: [id])
+  vendedorId String?
+}
+
+model Vendedor {
+  id       String  @id @default(uuid())
+  name   String
+  email    String? @unique
+  phone String?
+
+  users User[]
 }
 
 model Destino {
@@ -119,4 +131,5 @@ model Feedback {
 enum Role {
   USER
   ADMIN
+  VENDEDOR
 }
