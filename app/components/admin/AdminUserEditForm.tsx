@@ -56,19 +56,6 @@ export default function AdminUserEditForm(props: {
       {msg && <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{msg}</div>}
 
       <label className="grid gap-1 text-sm">
-        <span className="font-medium">Rol</span>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value as Role)}
-          className="rounded-md border px-3 py-2"
-        >
-          <option value="ADMIN">ADMIN</option>
-          <option value="SELLER">SELLER</option>
-          <option value="USER">USER</option>
-        </select>
-      </label>
-
-      <label className="grid gap-1 text-sm">
         <span className="font-medium">Estado</span>
         <select
           value={status}
