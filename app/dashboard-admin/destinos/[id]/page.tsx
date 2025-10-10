@@ -23,20 +23,42 @@ export default async function AdminDestinationDetailPage({ params }: { params: {
   const d = await prisma.destination.findFirst({
     where: { id: params.id, businessId },
     select: {
-      id: true, name: true, country: true, city: true, category: true, description: true,
-      isActive: true, popularityScore: true, createdAt: true, updatedAt: true,
+      id: true,
+      name: true,
+      country: true,
+      city: true,
+      category: true,
+      description: true,
+      imageUrl: true,
+      isActive: true,
+      popularityScore: true,
+      price: true, // 👈 Decimal
+      discountPrice: true, // 👈 Decimal
+      createdAt: true,
+      updatedAt: true,
       _count: { select: { reservations: true } },
     },
   });
+
   if (!d) notFound();
+
+  // 👇 Convertimos Decimals a Number de forma segura
+  const price = d.price ? Number(d.price) : 0;
+  const discountPrice = d.discountPrice ? Number(d.discountPrice) : null;
 
   const recentReservations = await prisma.reservation.findMany({
     where: { businessId, destinationId: d.id },
     orderBy: { createdAt: "desc" },
     take: 8,
     select: {
-      id: true, code: true, totalAmount: true, currency: true, status: true,
-      client: { select: { name: true } }, startDate: true, endDate: true,
+      id: true,
+      code: true,
+      totalAmount: true,
+      currency: true,
+      status: true,
+      client: { select: { name: true } },
+      startDate: true,
+      endDate: true,
     },
   });
 
@@ -49,13 +71,21 @@ export default async function AdminDestinationDetailPage({ params }: { params: {
             {[d.city, d.country].filter(Boolean).join(", ") || d.country} · {d.category || "Sin categoría"}
           </p>
         </div>
-        <a href="/dashboard-admin/destinos" className="rounded-md border px-3 py-2 text-sm">← Volver</a>
+        <a href="/dashboard-admin/destinos" className="rounded-md border px-3 py-2 text-sm">
+          ← Volver
+        </a>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Info y edición */}
         <div className="rounded-xl border bg-white p-4">
           <h2 className="mb-3 text-lg font-semibold">Editar destino</h2>
+
+          {d.imageUrl && (
+            <div className="mb-3">
+              <img src={d.imageUrl} alt={d.name} className="w-full rounded-md object-cover max-h-48" />
+            </div>
+          )}
 
           <EditDestinationForm
             dest={{
@@ -65,6 +95,9 @@ export default async function AdminDestinationDetailPage({ params }: { params: {
               city: d.city,
               category: d.category,
               description: d.description,
+              imageUrl: d.imageUrl,
+              price,
+              discountPrice,
             }}
           />
 
@@ -76,6 +109,18 @@ export default async function AdminDestinationDetailPage({ params }: { params: {
           <div className="mt-3 text-xs text-gray-500">
             Popularidad: {d.popularityScore} · Creado: {new Date(d.createdAt).toLocaleString("es-CO")} ·{" "}
             Actualizado: {new Date(d.updatedAt).toLocaleString("es-CO")}
+          </div>
+
+          {/* 👇 mostramos precios actuales */}
+          <div className="mt-3 text-sm">
+            <p>
+              <strong>Precio:</strong>{" "}
+              {price ? money(price) : <span className="text-gray-400">No definido</span>}
+            </p>
+            <p>
+              <strong>Precio con descuento:</strong>{" "}
+              {discountPrice ? money(discountPrice) : <span className="text-gray-400">No definido</span>}
+            </p>
           </div>
         </div>
 
