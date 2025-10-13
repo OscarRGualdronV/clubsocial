@@ -84,16 +84,6 @@ export default function AdminUserEditForm(props: { user: UserFormType }) {
 
       {/* Rol */}
       <label className="grid gap-1 text-sm">
-        <span className="font-medium">Rol</span>
-        <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="rounded-md border px-3 py-2">
-          <option value="ADMIN">ADMIN</option>
-          <option value="SELLER">SELLER</option>
-          <option value="USER">USER</option>
-        </select>
-      </label>
-
-      {/* Estado */}
-      <label className="grid gap-1 text-sm">
         <span className="font-medium">Estado</span>
         <select value={status} onChange={(e) => setStatus(e.target.value as Status)} className="rounded-md border px-3 py-2">
           <option value="ACTIVE">ACTIVE</option>
