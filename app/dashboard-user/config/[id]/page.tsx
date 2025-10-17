@@ -1,19 +1,22 @@
 'use client';
 
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import * as React from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 type UserShape = {
   id: string;
   name?: string | null;
   email: string;
   phone?: string | null;
-  country?: string | null;
-  preference?: string | null;
+  birthday?: string | null;
+  gender?: string | null;
   singleStatus?: string | null;
   affirmation?: string | null;
+  security?: string | null;
+  country?: string | null;
+  destino?: string | null;
   avatar?: string | null;
   dniFile?: string | null;
   passportFile?: string | null;
@@ -30,27 +33,31 @@ export default function EditProfilePage() {
   const [user, setUser] = useState<UserShape | null>(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
 
   const [form, setForm] = useState({
-    name: '',
-    email: '',
+    name: "",
+    email: "",
   });
 
   const [dniFile, setDniFile] = useState<File | null>(null);
   const [passportFile, setPassportFile] = useState<File | null>(null);
   const [visaFile, setVisaFile] = useState<File | null>(null);
 
-  // 🔹 Cargar usuario al inicio
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        const res = await fetch("/api/auth/me", { credentials: "include" });
         const data = await res.json();
         if (data.user) {
-          setUser(data.user);
+          setUser({
+            ...data.user,
+            passportFile: data.user.passport ?? null,
+            visaFile: data.user.visa ?? null,
+          });
           setForm({
-            name: data.user.name || '',
-            email: data.user.email || '',
+            name: data.user.name || "",
+            email: data.user.email || "",
           });
         }
       } catch (err) {
@@ -60,44 +67,36 @@ export default function EditProfilePage() {
     fetchUser();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-    if (!files?.[0]) return;
-
-    switch (name) {
-      case 'dni': setDniFile(files[0]); break;
-      case 'passport': setPassportFile(files[0]); break;
-      case 'visa': setVisaFile(files[0]); break;
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
     setLoading(true);
+    setSuccess(false);
 
     const formData = new FormData();
-    formData.append('name', form.name);
-    formData.append('email', form.email);
-
-    if (dniFile) formData.append('dni', dniFile);
-    if (passportFile) formData.append('passport', passportFile);
-    if (visaFile) formData.append('visa', visaFile);
+    formData.append("name", form.name);
+    formData.append("email", form.email);
+    if (dniFile) formData.append("dni", dniFile);
+    if (passportFile) formData.append("passport", passportFile);
+    if (visaFile) formData.append("visa", visaFile);
 
     try {
-      const res = await fetch('/api/user/update', {
-        method: 'POST',
+      const res = await fetch("/api/user/update", {
+        method: "POST",
         body: formData,
-        credentials: 'include',
+        credentials: "include",
       });
 
-      if (!res.ok) throw new Error('Error al actualizar perfil');
-      setSuccess(true);
-      setTimeout(() => router.push('/dashboard-user'), 1500);
+      if (res.ok) {
+        const data = await res.json();
+        setUser({
+          ...data.user,
+          passportFile: data.user.passport ?? null,
+          visaFile: data.user.visa ?? null,
+        });
+        setSuccess(true);
+      } else {
+        console.error("Error updating user");
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -105,149 +104,182 @@ export default function EditProfilePage() {
     }
   };
 
-  const userFiles = [
-    { label: 'DNI', stateFile: dniFile, existing: user?.dniFile, editable: true },
-    { label: 'Pasaporte', stateFile: passportFile, existing: user?.passportFile, editable: true },
-    { label: 'Visa', stateFile: visaFile, existing: user?.visaFile, editable: true },
-    { label: 'Purchase Order', stateFile: null, existing: user?.purchaseOrder, editable: false },
-    { label: 'Flight Tickets', stateFile: null, existing: user?.flightTickets, editable: false },
-    { label: 'Service Voucher', stateFile: null, existing: user?.serviceVoucher, editable: false },
-    { label: 'Medical Assistance Card', stateFile: null, existing: user?.medicalAssistanceCard, editable: false },
-    { label: 'Travel Tips', stateFile: null, existing: user?.travelTips, editable: false },
+  const fileList = [
+    { label: "DNI", url: user?.dniFile },
+    { label: "Pasaporte", url: user?.passportFile },
+    { label: "Visa", url: user?.visaFile },
+    { label: "Orden de compra", url: user?.purchaseOrder },
+    { label: "Boletos de vuelo", url: user?.flightTickets },
+    { label: "Voucher de servicio", url: user?.serviceVoucher },
+    { label: "Tarjeta de asistencia médica", url: user?.medicalAssistanceCard },
+    { label: "Tips de viaje", url: user?.travelTips },
   ];
 
   if (!user) return <p className="text-center mt-10">Cargando perfil...</p>;
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-md mt-8">
-  <h1 className="text-2xl font-bold mb-6 text-center">Editar perfil</h1>
+      <h1 className="text-2xl font-bold mb-6 text-center">Editar perfil</h1>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {/* Columna izquierda */}
-    <div className="space-y-4">
-      {/* Avatar */}
-      <div className="flex justify-center mb-4 md:justify-start">
-        <Image
-          src={user.avatar || '/images/default-avatar.png'}
-          alt={user.name || 'Avatar del usuario'}
-          width={120}
-          height={120}
-          className="rounded-full border-4 border-purple-500 object-cover"
-        />
-      </div>
+      <div className="space-y-8">
+        {/* Sección: Acerca de ti */}
+        <div className="border rounded-xl p-4">
+          <div className="flex items-center mb-4">
+            <h2 className="text-lg font-semibold mx-2">Acerca de ti</h2>
+            <Image
+                                src="/favicon/aboutme-club-solteros.svg"
+                                alt="Acerca de ti"
+                                width={25}
+                                height={25}
+                              />
+          </div>
 
-      {/* Nombre */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Nombre</label>
-        <input
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500"
-        />
-      </div>
-
-      {/* Email */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          name="email"
-          value={form.email}
-          onChange={handleChange}
-          className="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-purple-500 focus:border-purple-500"
-        />
-      </div>
-
-      {/* Teléfono solo lectura */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Teléfono</label>
-        <input
-          value={user.phone || 'No especificado'}
-          disabled
-          className="mt-1 w-full rounded-md border-gray-200 bg-gray-100 cursor-not-allowed"
-        />
-      </div>
-
-      {/* País solo lectura */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">País</label>
-        <input
-          value={user.country || 'No especificado'}
-          disabled
-          className="mt-1 w-full rounded-md border-gray-200 bg-gray-100 cursor-not-allowed"
-        />
-      </div>
-
-      {/* Campos no editables */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Preferencias</label>
-        <input
-          value={user.preference || 'No especificado'}
-          disabled
-          className="mt-1 w-full rounded-md border-gray-200 bg-gray-100 cursor-not-allowed"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Soltero/a</label>
-        <input
-          value={user.singleStatus || 'No especificado'}
-          disabled
-          className="mt-1 w-full rounded-md border-gray-200 bg-gray-100 cursor-not-allowed"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700">Afirmación personal</label>
-        <input
-          value={user.affirmation || 'No especificado'}
-          disabled
-          className="mt-1 w-full rounded-md border-gray-200 bg-gray-100 cursor-not-allowed"
-        />
-      </div>
-    </div>
-
-    {/* Columna derecha - Archivos */}
-    <div className="space-y-4">
-      {userFiles.map((f) => (
-        <div key={f.label}>
-          <label className="block text-sm font-medium text-gray-700">{f.label}</label>
-          {['DNI', 'Pasaporte', 'Visa'].includes(f.label) ? (
-            <input
-              type="file"
-              name={f.label.toLowerCase()}
-              accept="image/*,.pdf"
-              onChange={handleFileChange}
-              className="mt-1 w-full"
-            />
-          ) : null}
-          <p className="text-sm text-gray-500 mt-1">
-            {f.stateFile?.name || 'No subido'}
-          </p>
+          <div className="space-y-2">
+            {[
+              { label: "Nombre", value: user.name },
+              { label: "Email", value: user.email },
+              { label: "Teléfono", value: user.phone },
+              { label: "Cumpleaños", value: user.birthday },
+              { label: "Ubicación", value: user.country },
+              { label: "Género", value: user.gender },
+              { label: "¿Soltero/a?", value: user.singleStatus },
+              { label: "Afirmación", value: user.affirmation },
+              { label: "Seguridad", value: user.security },
+            ].map((field) => (
+              <div
+                key={field.label}
+                className="flex justify-between items-center p-2 border-b last:border-none"
+              >
+                <span className="font-medium">{field.label}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-600">
+                    {field.value ?? "No especificado"}
+                  </span>
+                  
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+
+        {/* Sección: Documentos de viaje */}
+        <div className="border rounded-xl p-4">
+          <div className="flex items-center mb-4">
+            
+            <h2 className="text-lg font-semibold mx-2">Documentos de viaje</h2>
+            <Image
+                                src="/favicon/maletin-club-solteros.svg"
+                                alt="Doc"
+                                width={25}
+                                height={25}
+                              />
+          </div>
+
+          <div className="flex justify-center mb-4">
+            <Image
+              src={user.avatar || "/images/default-avatar.png"}
+              alt={user.name || "Avatar del usuario"}
+              width={120}
+              height={120}
+              className="rounded-full border-4 border-purple-500 object-cover"
+            />
+          </div>
+
+          {/* Botón mostrar archivos */}
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={() => setShowFiles(!showFiles)}
+              className="w-full text-left px-4 py-2 bg-purple-100 text-purple-800 font-medium rounded-md hover:bg-purple-200"
+            >
+              {showFiles ? "Ocultar archivos subidos" : "Ver archivos subidos"}
+            </button>
+            {showFiles && (
+              <div className="mt-2 grid grid-cols-1 gap-3">
+                {fileList.map((file) => (
+                  <div
+                    key={file.label}
+                    className="bg-white rounded-lg shadow p-3 flex justify-between items-center"
+                  >
+                    <span className="font-medium text-gray-800">
+                      {file.label}
+                    </span>
+                    {file.url ? (
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-purple-600 hover:underline"
+                      >
+                        Ver
+                      </a>
+                    ) : (
+                      <span className="text-sm text-gray-400">No subido</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Archivos para subir */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4"
+          >
+            <label className="block">
+              <span className="text-gray-700 font-medium">DNI</span>
+              <input
+                type="file"
+                onChange={(e) => setDniFile(e.target.files?.[0] || null)}
+                className="w-full mt-1 text-sm"
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Pasaporte</span>
+              <input
+                type="file"
+                onChange={(e) => setPassportFile(e.target.files?.[0] || null)}
+                className="w-full mt-1 text-sm"
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-gray-700 font-medium">Visa</span>
+              <input
+                type="file"
+                onChange={(e) => setVisaFile(e.target.files?.[0] || null)}
+                className="w-full mt-1 text-sm"
+              />
+            </label>
+
+            <div className="flex flex-col sm:flex-row gap-3 mt-2 col-span-full">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition disabled:bg-purple-300"
+              >
+                {loading ? "Guardando..." : "Guardar archivos"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard-user")}
+                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition"
+              >
+                Volver
+              </button>
+            </div>
+
+            {success && (
+              <p className="text-green-600 font-medium text-center mt-2 col-span-full">
+                Datos actualizados correctamente ✅
+              </p>
+            )}
+          </form>
+        </div>
+      </div>
     </div>
-
-    {/* Botón centrado al final */}
-    <div className="md:col-span-2 flex justify-center mt-6">
-      <button
-        type="submit"
-        disabled={loading}
-        onClick={handleSubmit}
-        className="w-1/2 bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700"
-      >
-        {loading ? 'Guardando...' : 'Guardar cambios'}
-      </button>
-    </div>
-  </div>
-
-  {success && (
-    <p className="text-center text-green-600 mt-3">
-      Perfil actualizado correctamente ✅
-    </p>
-  )}
-</div>
-
-
   );
 }
