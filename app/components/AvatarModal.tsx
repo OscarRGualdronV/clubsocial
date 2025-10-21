@@ -50,12 +50,19 @@ export default function AvatarModal({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Imagen de fondo */}
-            <Image src={avatar} alt={name ?? "Avatar"} fill className="object-cover" />
+            <Image
+              src={avatar}
+              alt={name ?? "Avatar"}
+              fill
+              className="object-cover"
+            />
 
             {/* Overlay info */}
             <div className="absolute top-4 left-4 text-white font-montserrat space-y-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold font-montserrat">{name}</h2>
+                <h2 className="text-lg font-semibold font-montserrat">
+                  {name}
+                </h2>
                 {verified && (
                   <Image
                     src="/favicon/check-aprobacion-club-solteros.svg"
@@ -75,17 +82,39 @@ export default function AvatarModal({
               )}
 
               {preferences.length > 0 ? (
-                <ul className="flex flex-wrap gap-3">
-                  {preferences.map((g, i) => (
-                    <li key={i} className="flex items-center gap-1">
-                      <p className="text-xs bg-white text-black px-2 py-0.5 rounded font-montserrat">
-                        {g}
-                      </p>
-                    </li>
-                  ))}
+                <ul className="flex flex-wrap gap-3 font-montserrat">
+                  {preferences.map((g, i) => {
+                    const icons: string[] = [];
+                    if (g.toLowerCase() === "playa")
+                      icons.push("/favicon/playa-club-solteros.svg");
+                    if (g.toLowerCase() === "aventura")
+                      icons.push("/favicon/aventura-club-solteros.svg");
+                    if (g.toLowerCase() === "cultura")
+                      icons.push("/favicon/cultura-club-solteros.svg");
+                    if (g.toLowerCase() === "mixto")
+                      icons.push(
+                        "/favicon/playa-club-solteros.svg",
+                        "/favicon/aventura-club-solteros.svg",
+                        "/favicon/cultura-club-solteros.svg"
+                      );
+
+                    return (
+                      <li key={i} className="flex items-center gap-1">
+                        {icons.map((icon, idx) => (
+                          <Image
+                            key={idx}
+                            src={icon}
+                            alt={g}
+                            width={20}
+                            height={20}
+                          />
+                        ))}
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
-                <p className="text-gray-300 text-sm font-montserrat">
+                <p className="text-gray-500 text-sm font-montserrat">
                   No especificado
                 </p>
               )}

@@ -39,9 +39,9 @@ export default function UserProfile({ user }: { user: UserShape }) {
   const [avatarPreview, setAvatarPreview] = React.useState<string>(
     user.avatar ?? "/images/default-avatar.png"
   );
- const searchParams = useSearchParams();
-const tabFromQuery = searchParams.get("tab");
-const [activeTab, setActiveTab] = React.useState(tabFromQuery ?? "destinos");
+  const searchParams = useSearchParams();
+  const tabFromQuery = searchParams.get("tab");
+  const [activeTab, setActiveTab] = React.useState(tabFromQuery ?? "destinos");
   const [loading, setLoading] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = React.useState(false);
@@ -388,46 +388,70 @@ const [activeTab, setActiveTab] = React.useState(tabFromQuery ?? "destinos");
             </h2>
             {gustos.length > 0 ? (
               <ul className="flex flex-wrap gap-6 font-montserrat justify-start">
-  {gustos.map((g, i) => {
-    // Determinar los iconos según el gusto
-    const icons =
-      g.toLowerCase() === "mixto"
-        ? [
-            { src: "/favicon/playa-club-solteros.svg", label: "Playa" },
-            { src: "/favicon/aventura-club-solteros.svg", label: "Aventura" },
-            { src: "/favicon/cultura-club-solteros.svg", label: "Cultura" },
-          ]
-        : g.toLowerCase() === "playa"
-        ? [{ src: "/favicon/playa-club-solteros.svg", label: "Playa" }]
-        : g.toLowerCase() === "aventura"
-        ? [{ src: "/favicon/aventura-club-solteros.svg", label: "Aventura" }]
-        : g.toLowerCase() === "cultura"
-        ? [{ src: "/favicon/cultura-club-solteros.svg", label: "Cultura" }]
-        : [];
+                {gustos.map((g, i) => {
+                  // Determinar los iconos según el gusto
+                  const icons =
+                    g.toLowerCase() === "mixto"
+                      ? [
+                          {
+                            src: "/favicon/playa-club-solteros.svg",
+                            label: "Playa",
+                          },
+                          {
+                            src: "/favicon/aventura-club-solteros.svg",
+                            label: "Aventura",
+                          },
+                          {
+                            src: "/favicon/cultura-club-solteros.svg",
+                            label: "Cultura",
+                          },
+                        ]
+                      : g.toLowerCase() === "playa"
+                      ? [
+                          {
+                            src: "/favicon/playa-club-solteros.svg",
+                            label: "Playa",
+                          },
+                        ]
+                      : g.toLowerCase() === "aventura"
+                      ? [
+                          {
+                            src: "/favicon/aventura-club-solteros.svg",
+                            label: "Aventura",
+                          },
+                        ]
+                      : g.toLowerCase() === "cultura"
+                      ? [
+                          {
+                            src: "/favicon/cultura-club-solteros.svg",
+                            label: "Cultura",
+                          },
+                        ]
+                      : [];
 
-    return (
-      <li key={i} className="flex gap-6">
-        {icons.map((icon, idx) => (
-          <div
-            key={idx}
-            className="flex flex-col items-center text-center"
-          >
-            <Image
-              src={icon.src}
-              alt={icon.label}
-              width={50}
-              height={50}
-              className="transition-transform duration-200 hover:scale-110"
-            />
-            <span className="text-sm mt-1 text-gray-700">{icon.label}</span>
-          </div>
-        ))}
-      </li>
-    );
-  })}
-</ul>
-
-
+                  return (
+                    <li key={i} className="flex gap-6">
+                      {icons.map((icon, idx) => (
+                        <div
+                          key={idx}
+                          className="flex flex-col items-center text-center"
+                        >
+                          <Image
+                            src={icon.src}
+                            alt={icon.label}
+                            width={50}
+                            height={50}
+                            className="transition-transform duration-200 hover:scale-110"
+                          />
+                          <span className="text-sm mt-1 text-gray-700">
+                            {icon.label}
+                          </span>
+                        </div>
+                      ))}
+                    </li>
+                  );
+                })}
+              </ul>
             ) : (
               <p className="text-gray-500 text-sm font-montserrat">
                 No especificado
