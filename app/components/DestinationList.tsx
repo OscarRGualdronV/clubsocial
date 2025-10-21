@@ -183,13 +183,16 @@ export default function DestinationsList({
                           router.push("/dashboard-user/match-viajes")
                         } // ✅ redirige al componente nuevo
                       >
-                        <Image
-                          src={viajero.avatar || "/images/default-avatar.png"}
-                          alt={viajero.name || "Viajero"}
-                          width={40}
-                          height={40}
-                          className="rounded-full border-2 border-white shadow-sm transition-transform duration-200 group-hover:scale-110"
-                        />
+                        <div className="w-10 h-10 rounded-full border-1 border-black overflow-hidden shadow-sm transition-transform duration-200 group-hover:scale-110">
+  <Image
+    src={viajero.avatar || "/images/default-avatar.png"}
+    alt={viajero.name || "Viajero"}
+    width={40}
+    height={40}
+    className="object-cover w-full h-full"
+  />
+</div>
+
                         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-900 text-white text-xs font-medium py-1 px-2 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                           {viajero.name || "Viajero"}
                         </div>

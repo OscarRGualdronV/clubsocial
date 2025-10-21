@@ -51,11 +51,17 @@ export default function EditProfilePage() {
           data.user.birthday && data.user.birthday !== null
             ? new Date(data.user.birthday).toISOString().split("T")[0]
             : null;
+        const singleStatus =
+  data.user.singleStatus === true || data.user.singleStatus === "true"
+    ? "Sí"
+    : data.user.singleStatus === false || data.user.singleStatus === "false"
+    ? "No"
+    : null;
 
         // Forzamos verified a booleano real
         const verified = data.user.verified === true || data.user.verified === 1 || data.user.verified === "true";
 
-        setUser({ ...data.user, birthday, verified });
+        setUser({ ...data.user, birthday, verified, singleStatus });
       }
     } catch (err) {
       console.error(err);
@@ -268,7 +274,7 @@ export default function EditProfilePage() {
                       onClick={() => openEditor(field.key, field.value ?? "")}
                       className="text-purple-600 hover:text-purple-800 text-sm"
                     >
-                      ✏️
+                      ➤
                     </button>
                   )}
                 </div>
@@ -318,7 +324,7 @@ export default function EditProfilePage() {
               className="text-purple-600 hover:text-purple-800 text-sm"
               onClick={() => openEditor(file.key, null)}
             >
-              ✏️
+              ➤
             </button>
           </div>
         </div>
